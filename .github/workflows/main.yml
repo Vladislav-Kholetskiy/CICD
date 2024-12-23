@@ -37,15 +37,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Установка SSH клиента
+      - name: Install SSH Client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      # Отладка: Проверка передачи SSH-ключа (не забудьте удалить этот шаг после отладки)
+      - name: Debug SSH Key
+        run: |
+          echo "$SSH_PRIVATE_KEY" | wc -c
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       
+      # Установка SSH и деплой
       - name: Set up SSH and Deploy
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
-          mkdir -p $HOME/.ssh
-          echo "$SSH_PRIVATE_KEY" > $HOME/.ssh/id_rsa
-          chmod 600 $HOME/.ssh/id_rsa
-          ssh-keyscan -H $SERVER_IP >> $HOME/.ssh/known_hosts
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
           ssh $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
+
+      # Проверка успешного SSH подключения
+      - name: Test SSH Connection
+        run: ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "echo SSH connection successful"
