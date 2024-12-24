@@ -55,3 +55,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
           ssh $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
+          - name: Debug Server IP
+  run: echo "Server IP is $SERVER_IP"
+  env:
+    SERVER_IP: ${{ secrets.SERVER_IP }}
