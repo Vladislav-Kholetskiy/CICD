@@ -32,41 +32,26 @@ jobs:
       - name: Run Tests
         run: mvn test
 
-  deploy:
-    needs: build
+  build-and-deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-
+    needs: build  # Выполняется после успешного билда
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Server
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Build Application
+        run: mvn clean package  # Сборка JAR файла
+
+      - name: Run Application
         run: |
-          set -x  # Включаем режим отладки для вывода всех команд
-          echo "User: $(whoami)"
-          echo "Home directory: $HOME"
-          ls -ld $HOME || echo "Home directory not found"
+          java -jar target/*.jar &
+          sleep 5
 
-          # Создание директории .ssh
-          mkdir -p $HOME/.ssh || sudo mkdir -p /home/runner/.ssh || sudo mkdir -p /Users/runner/.ssh
-
-          # Проверяем создание директории
-          ls -la $HOME/.ssh || echo "Failed to create .ssh directory"
-
-          # Записываем SSH-ключ (отладка)
-          echo "$SSH_PRIVATE_KEY" > $HOME/.ssh/id_rsa
-          ls -la $HOME/.ssh/id_rsa || echo "Failed to create id_rsa file"
-
-          # Проверяем содержимое ключа (первые 5 строк)
-          head -n 5 $HOME/.ssh/id_rsa || echo "SSH key is empty"
-
-          chmod 600 $HOME/.ssh/id_rsa
-
-          # Добавляем сервер в known_hosts (отладка)
-          ssh-keyscan 192.168.111.128 >> $HOME/.ssh/known_hosts || echo "Failed to add to known_hosts"
-
-          # Подключение к серверу и деплой
-          ssh user@192.168.111.128 'bash ~/deploy.sh' || echo "Failed to connect to server"
+      - name: Test Application works
+        run: curl -v http://localhost:9090
