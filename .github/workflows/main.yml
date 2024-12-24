@@ -47,7 +47,10 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
-          mkdir -p ~/.ssh
+          set -x
+          whoami
+          ls -ld ~
+          mkdir -p ~/.ssh || { echo "Failed to create .ssh directory"; exit 1; }
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
