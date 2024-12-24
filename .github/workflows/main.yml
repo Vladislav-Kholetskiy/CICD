@@ -57,10 +57,8 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           HOME: /home/user
         run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+         ssh $SERVER_USER@$SERVER_IP 'mkdir -p ~/.ssh && echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa'
+          ssh $SERVER_USER@$SERVER_IP 'ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts'
           ssh $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
 
       # Проверка успешного SSH подключения
