@@ -47,7 +47,5 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
-          mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
+          ssh user@192.168.111.128 'bash ~/deploy.sh'
