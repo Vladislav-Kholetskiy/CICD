@@ -47,11 +47,7 @@ jobs:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
-          set -x
-          whoami
-          ls -ld ~
           mkdir -p ~/.ssh || { echo "Failed to create .ssh directory"; exit 1; }
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -v -o KexAlgorithms=diffie-hellman-group14-sha256 -H $SERVER_IP >> ~/.ssh/known_hosts
-          ssh $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
