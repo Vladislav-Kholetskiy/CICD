@@ -50,4 +50,4 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
+          ssh $SERVER_USER@$SERVER_IP 'bash ~/deploy.sh'
