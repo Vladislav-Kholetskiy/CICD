@@ -32,12 +32,6 @@ jobs:
             - name: Run Tests
               run: mvn test
 
-            - name: Upload artifact
-              uses: actions/upload-artifact@v3
-              with:
-                  name: app
-                  path: target/Calculator-1.0-SNAPSHOT.jar
-
     deploy:
         runs-on: ubuntu-latest
         needs: build
@@ -48,7 +42,12 @@ jobs:
               with:
                   name: app
 
-            - name: Deploy to Server on SSH
+            - name: Prepare SSH known_hosts
+              run: |
+                  mkdir -p ~/.ssh
+                  ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+            - name: Deploy to Server On SSH
               env:
                   SERVER_IP: ${{ secrets.SERVER_IP }}
                   SERVER_USER: ${{ secrets.SERVER_USER }}
