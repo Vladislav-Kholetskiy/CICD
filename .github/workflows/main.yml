@@ -32,31 +32,24 @@ jobs:
       - name: Run Tests
         run: mvn test
 
-  name: Deploy to Ubuntu Server
+  deploy:
+    name: Deploy to Ubuntu Server
+    runs-on: ubuntu-latest
 
-  on:
-    push:
-      branches:
-        - main
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  jobs:
-    deploy:
-      runs-on: ubuntu-latest
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
+      - name: Add the server to known_hosts
+        run: |
+          ssh-keyscan -H <your-server-ip> >> ~/.ssh/known_hosts
 
-        - name: Set up SSH key
-          run: |
-            mkdir -p ~/.ssh
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-            chmod 600 ~/.ssh/id_rsa
-
-        - name: Add the server to known_hosts
-          run: |
-            ssh-keyscan -H <your-server-ip> >> ~/.ssh/known_hosts
-
-        - name: SSH into server and run commands
-          run: |
-            ssh -i ~/.ssh/id_rsa user@<your-server-ip> "echo 'SSH connection successful'"
+      - name: SSH into server and run commands
+        run: |
+          ssh -i ~/.ssh/id_rsa user@<your-server-ip> "echo 'SSH connection successful'"
